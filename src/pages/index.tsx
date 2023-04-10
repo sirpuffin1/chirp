@@ -1,8 +1,9 @@
-import { SignInButton } from "@clerk/nextjs";
+import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
 
 const Home: NextPage = () => {
+  const {user, isSignedIn} = useUser();
 
   return (
     <>
@@ -12,9 +13,10 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <SignInButton mode="modal">
-          <button className="btn text-white">Sign in</button>
-        </SignInButton>
+        <div>
+          {!isSignedIn && <SignInButton />}
+          {!!isSignedIn && <SignOutButton />}
+        </div>
       </main>
     </>
   );
