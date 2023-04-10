@@ -1,9 +1,12 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
+import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
   const {user, isSignedIn} = useUser();
+
+  const { data } = api.posts.getAll.useQuery()
 
   return (
     <>
@@ -16,6 +19,11 @@ const Home: NextPage = () => {
         <div>
           {!isSignedIn && <SignInButton />}
           {!!isSignedIn && <SignOutButton />}
+        </div>
+        <div>
+          {data?.map((post) => (
+            <li key={post.id} className="text-white">{post.content}</li>
+          ))}
         </div>
       </main>
     </>
