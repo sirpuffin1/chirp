@@ -1,4 +1,4 @@
-const Loader = (props: { size?: number }) => {
+export const Loader = (props: { size?: number }) => {
   return (
     <div role="status">
       <svg
