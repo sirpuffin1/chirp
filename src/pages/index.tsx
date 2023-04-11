@@ -13,7 +13,14 @@ dayjs.extend(relativeTime)
 
 const CreatePostWizard = () => {
   const { user } = useUser();
-  const { mutate } = api.posts.create.useMutation();
+
+  const ctx = api.useContext();
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("")
+      void ctx.posts.getAll.invalidate()
+    }
+  });
 
   const [input, setInput ] = useState("")
 
@@ -22,12 +29,24 @@ const CreatePostWizard = () => {
   
 
   return (
-    <div className="flex gap-3 w-full">
-      <Image src={user.profileImageUrl} alt="User's profile image" className="w-14 h-14 rounded-full" height={56} width={56} />
-      <input placeholder="Type some emojis!" className="bg-transparent grow" value={input} onChange={(e) => setInput(e.target.value)} />
-      <button onClick={() => mutate({content: input})}>Post </button>
+    <div className="flex w-full gap-3">
+      <Image
+        src={user.profileImageUrl}
+        alt="User's profile image"
+        className="h-14 w-14 rounded-full"
+        height={56}
+        width={56}
+      />
+      <input
+        placeholder="Type some emojis!"
+        className="grow bg-transparent"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
+      />
+      <button onClick={() => mutate({ content: input })}>Post </button>
     </div>
-  )
+  );
 }
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number]
