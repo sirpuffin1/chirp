@@ -1,4 +1,4 @@
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -6,8 +6,18 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime"
 import Image from "next/image";
 import LoadingPage, { Loader } from "~/components/Loader";
-import { useState } from "react";
 import toast from "react-hot-toast";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+export const emojiValidator = z.string().emoji('Only emojis are allowed.').min(1).max(280);
+
+const postInputSchema = z.object({
+  content: emojiValidator
+})
+
+type PostInputSchemaType = z.infer<typeof postInputSchema>
 
 
 dayjs.extend(relativeTime)
@@ -18,7 +28,7 @@ const CreatePostWizard = () => {
   const ctx = api.useContext();
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
-      setInput("")
+      reset()
       void ctx.posts.getAll.invalidate()
     },
     onError: (e) => {
@@ -31,11 +41,19 @@ const CreatePostWizard = () => {
     }
   });
 
-  const [input, setInput ] = useState("")
+  
+  const { handleSubmit, register, reset, watch } = useForm<PostInputSchemaType>({
+    resolver: zodResolver(postInputSchema)
+  });
+
+ 
+  const content = watch("content")
 
   if(!user) return null;
   
-  
+  function onSubmit (data: PostInputSchemaType) {
+    mutate(data)
+  }
 
   return (
     <div className="flex w-full gap-3">
@@ -46,32 +64,26 @@ const CreatePostWizard = () => {
         height={56}
         width={56}
       />
+      
+    <form onSubmit={handleSubmit(onSubmit)} className="flex w-full">
       <input
         placeholder="Type some emojis!"
         className="grow bg-transparent"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if(e.key === "Enter") {
-            e.preventDefault();
-            if (input !== "") {
-              mutate({ content: input })
-            }
-          }
-        }}
+        {...register("content")}
         disabled={isPosting}
       />
-      {input !== "" && !isPosting && (
-        <button onClick={() => mutate({ content: input })} disabled={isPosting}>
-          Post{" "}
-        </button>
-      )}
+      </form>
 
+      {content && !isPosting && (
+      <button onClick={handleSubmit(onSubmit)} type="submit">Post</button>
+    )}
+      
       {isPosting && (
         <div className="flex items-center justify-center">
           <Loader size={20} />
         </div>
       )}
+      
     </div>
   );
 }
