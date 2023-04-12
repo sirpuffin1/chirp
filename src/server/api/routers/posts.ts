@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { z } from "zod";
+import { emojiValidator } from "~/pages";
 
 import {
   createTRPCRouter,
@@ -19,7 +20,8 @@ const filterUsersForClient = (user: User) => {
   };
 };
 
-export const emojiValidator = z.string().emoji('Only emojis are allowed.').min(1).max(280);
+// export const emojiValidator = z.string().emoji('Only emojis are allowed.').min(1).max(280);
+
 
 // Create a new ratelimiter that allows for 3 requests per 1 minute
 const ratelimit = new Ratelimit({
