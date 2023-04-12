@@ -19,6 +19,8 @@ const filterUsersForClient = (user: User) => {
   };
 };
 
+export const emojiValidator = z.string().emoji('Only emojis are allowed.').min(1).max(280);
+
 // Create a new ratelimiter that allows for 3 requests per 1 minute
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -67,7 +69,7 @@ export const postsRouter = createTRPCRouter({
   create: privateProcedure
     .input(
       z.object({
-        content: z.string().emoji("Only emojis are allowed.").min(1).max(280),
+        content: emojiValidator,
       })
     )
     .mutation(async ({ ctx, input }) => {
