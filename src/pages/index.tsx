@@ -1,6 +1,5 @@
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
-import Head from "next/head";
 import { api, type RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -11,6 +10,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import Layout from "~/components/Layout";
 
 export const emojiValidator = z
   .string()
@@ -45,7 +45,7 @@ const CreatePostWizard = () => {
     },
   });
 
-  const { handleSubmit, register, reset, watch } = useForm<PostInputSchemaType>(
+  const { handleSubmit, register, reset, watch, formState: {isValid} } = useForm<PostInputSchemaType>(
     {
       resolver: zodResolver(postInputSchema),
     }
@@ -56,7 +56,15 @@ const CreatePostWizard = () => {
   if (!user) return null;
 
   function onSubmit(data: PostInputSchemaType) {
-    mutate(data);
+    mutate(data)    
+  }
+
+  function handlePostButtonClick() {
+      if (isValid) {
+        handleSubmit(onSubmit);
+      } else {
+        toast.error('Only emojis are allowed.');
+      }
   }
 
   return (
@@ -79,7 +87,7 @@ const CreatePostWizard = () => {
       </form>
 
       {content && !isPosting && (
-        <button onClick={handleSubmit(onSubmit)} type="submit">
+        <button onClick={handlePostButtonClick} type="submit">
           Post
         </button>
       )}
@@ -146,19 +154,17 @@ const Home: NextPage = () => {
   if (!userLoaded) return <div />;
 
   return (
-    <main className="flex h-screen justify-center">
-      <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
-        <div className="border-b border-slate-400 p-4">
-          {!isSignedIn && (
-            <div className="flex justify-center">
-              <SignInButton />
-            </div>
-          )}
-          {!!isSignedIn && <CreatePostWizard />}
-        </div>
-        <Feed />
+    <Layout>
+      <div className="border-b border-slate-400 p-4">
+        {!isSignedIn && (
+          <div className="flex justify-center">
+            <SignInButton />
+          </div>
+        )}
+        {!!isSignedIn && <CreatePostWizard />}
       </div>
-    </main>
+      <Feed />
+    </Layout>
   );
 };
 
