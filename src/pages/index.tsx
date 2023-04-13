@@ -59,9 +59,10 @@ const CreatePostWizard = () => {
     mutate(data)    
   }
 
-  function handlePostButtonClick() {
+ function handlePostButtonClick() {
       if (isValid) {
-        handleSubmit(onSubmit);
+       // eslint-disable-next-line @typescript-eslint/no-floating-promises
+       handleSubmit(onSubmit)();
       } else {
         toast.error('Only emojis are allowed.');
       }
@@ -137,7 +138,7 @@ const Feed = () => {
   if (!data) return <div>Something went wrong</div>;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex grow flex-col overflow-y-scroll hide-scrollbar">
       {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
