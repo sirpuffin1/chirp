@@ -12,13 +12,7 @@ import {
   privateProcedure,
 } from "~/server/api/trpc";
 
-const filterUsersForClient = (user: User) => {
-  return {
-    id: user.id,
-    username: user.username,
-    profileImage: user.profileImageUrl,
-  };
-};
+import { filterUsersForClient } from "~/server/helpers/filterUserForClient";
 
 // export const emojiValidator = z.string().emoji('Only emojis are allowed.').min(1).max(280);
 
