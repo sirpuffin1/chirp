@@ -34,7 +34,7 @@ export const postsRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
       take: 100,
-      orderBy: [{ createdAt: "desc"}]
+      orderBy: [{ createdAt: "desc" }],
     });
 
     const users = (
@@ -62,6 +62,23 @@ export const postsRouter = createTRPCRouter({
       };
     });
   }),
+
+  getPostsByUserId: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) =>
+      ctx.prisma.post.findMany({
+        where: {
+          authorId: input.userId,
+        },
+        take: 100,
+        orderBy: [{ createdAt: "desc" }],
+      })
+    ),
+
   create: privateProcedure
     .input(
       z.object({
@@ -71,9 +88,9 @@ export const postsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.userId;
 
-      const {success} = await ratelimit.limit(authorId)
+      const { success } = await ratelimit.limit(authorId);
 
-      if(!success) throw new TRPCError({code: "TOO_MANY_REQUESTS"})
+      if (!success) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
 
       const post = await ctx.prisma.post.create({
         data: {
